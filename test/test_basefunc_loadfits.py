@@ -31,3 +31,6 @@ class Test_loadfits(unittest.TestCase):
         d = analyse.basefunc.loadfits.loadfits(test_2ddata)
         self.assertIsInstance(d, pyfits.hdu.image.PrimaryHDU)
 
+
+if __name__=='__main__':
+    unittest.main()
