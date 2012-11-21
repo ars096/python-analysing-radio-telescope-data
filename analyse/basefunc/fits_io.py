@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2.7
 #-*- coding: utf-8 -*-
 
 """
@@ -14,3 +14,10 @@ def loadfits(fitspath):
         return hdu[1]
 
     return hdu[0]
+
+
+def savefits(hdu, path):
+    hdu.writeto(path)
+    return
+
+
