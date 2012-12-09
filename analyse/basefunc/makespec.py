@@ -5,6 +5,8 @@
 Documents
 """
 
+''' test '''
+
 def makespec(hdu):
     obs_mode = hdu.data['OBSMODE'][0].upper()
 
