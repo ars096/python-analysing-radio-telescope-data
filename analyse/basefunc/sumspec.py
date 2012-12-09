@@ -29,3 +29,15 @@ def sumspec_ps(hdus):
     header = hdus[0].header.copy()
     sum_hdu = pyfits.PrimaryHDU(sumd, header)
     return sum_hdu
+
+def sumspec_otf(hdus):
+    # 今のところotfに対応していないかも
+    import numpy
+    import pyfits
+
+    d = [numpy.average(hdu.data[:,0,:], axis=1) for hdu in hdus]
+    sumd = numpy.average(d, axis=0).reshape(len(d[0]), 1, 1)
+
+    header = hdus[0].header.copy()
+    sum_hdu = pyfits.PrimaryHDU(sumd, header)
+    return sum_hdu
