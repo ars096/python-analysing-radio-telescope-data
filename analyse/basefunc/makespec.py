@@ -177,7 +177,7 @@ def makespec_otf(hdu):
     else:
         ind = -1
         count = 0
-        nidn = range(len(Ta_list['OTADEL']))
+        nind = range(len(Ta_list['OTADEL']))
         ncount = len(Ta_list['OTADEL'].count('N'))
         pass
     

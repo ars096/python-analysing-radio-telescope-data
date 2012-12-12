@@ -18,13 +18,18 @@ def basefit(hdu, mode='auto', *args, **kwargs):
     cdelt3 = hdu.header['CDELT3']
     v = (numpy.arange(nz) - crpix3) * cdelt3 + crval3
     spectra = hdu.data.copy().T.reshape(nx*ny, nz)
-    fitted = [fitfunc(spec, v, *args, **kwargs) for spec in spectra]
-    fitted = numpy.array(fitted).reshape(nx, ny, nz).T
+    fit_results = [fitfunc(spec, v, *args, **kwargs) for spec in spectra]
+    fitted = numpy.array(fit_results)[:,0].reshape(nx, ny, nz).T
+    emission_flag = numpy.array(fit_results)[:,1].reshape(nx, ny, nz).T
 
     header = hdu.header.copy()
     header.add_history('pyanalyse.basefit: generate fitted data (mode:%s)'%mode)
     header.add_history('pyanalyse.basefit: time stamp (%s)'%time.strftime('%Y/%m/%d %H:%M:%S'))
-    return pyfits.PrimaryHDU(fitted, header)
+
+    ef_header = hdu.header.copy()
+    ef_header.add_history('pyanalyse.basefit: generate emission flag (mode:%s)'%mode)
+    ef_header.add_history('pyanalyse.basefit: time stamp (%s)'%time.strftime('%Y/%m/%d %H:%M:%S'))
+    return pyfits.PrimaryHDU(fitted, header), pyfits.PrimaryHDU(emission_flag, ef_header)
 
 
 def basefit_simple(spect, v, fitting_part=None, degree=1):
@@ -52,7 +57,11 @@ def basefit_simple(spect, v, fitting_part=None, degree=1):
     fitted_curve = numpy.polyfit(v[fit_indices], spect[fit_indices], deg=degree)
     fitted_spect = spect - numpy.polyval(fitted_curve, v)
 
-    return fitted_spect
+    emission_flag = numpy.ones(len(spect))
+    emission_flag[fit_indices] = 0
+
+    return fitted_spect, emission_flag
+
 
 def basefit_auto(spect, v):
     return spect
