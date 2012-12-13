@@ -188,7 +188,6 @@ def makespec_otf(hdu):
         ra = Ta_list['CRVAL2'][ind] + Ta_list['LAMDEL'][ind]/3600.
         pass
     elif ncount != 0:
-        #ra = Ta_list['CRVAL2'][nind] + Ta_list['LAMDEL'][nind]/3600.
         ra = Ta_list['CRVAL2'][nind] + Ta_list['LAMDEL'][nind]/3600./numpy.cos(dec[nind]*numpy.pi/180.)
         pass
     else:
@@ -199,7 +198,6 @@ def makespec_otf(hdu):
         dra = ra[ind] - Ta_list[3]['CRVAL2']
         pass
     elif ncount != 0:
-        #dra = ra[nind] - Ta_list[3]['CRVAL2']
         dra = (ra[nind] - Ta_list[0]['CRVAL2']) * numpy.cos(dec[nind]*numpy.pi/180.)
         pass
     
