@@ -10,8 +10,10 @@ def makespec(hdu):
 
     if obs_mode=='PS':
         return makespec_ps(hdu)
-    elif obs_mode=='OTF':
+    elif obs_mode in ['OTF','LINEOTF']:
         return makespec_otf(hdu)
+    else:
+        print("not supported data: 'OBSMODE': %s"%(obsmode))
 
 
 def makespec_ps(hdu):
