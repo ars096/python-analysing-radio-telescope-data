@@ -59,6 +59,8 @@ def basefit_simple(spect, v, fitting_part=None, degree=1):
 
     emission_flag = numpy.ones(len(spect))
     emission_flag[fit_indices] = 0
+    emission_flag[:fit_indices.min()] = -1
+    emission_flag[fit_indices.max():] = -1
 
     return fitted_spect, emission_flag
 
