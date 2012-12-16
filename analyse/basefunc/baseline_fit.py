@@ -44,27 +44,32 @@ def basefit_simple(spect, v, fitting_part=None, degree=1):
         fitting_part = ((-100,-50), (50,100))
         pass
 
-    fit_indices = []
+    fit_indices = numpy.zeros(spect.shape)
     for start, end in fitting_part:
         start_ind = nearest_index(start*1000, v)
         end_ind = nearest_index(end*1000, v)
-        if start_ind < end_ind: step = 1
-        else: step = -1
-        fit_indices.append(numpy.arange(start_ind, end_ind, step))
+        if start_ind > end_ind:
+            tmp = start_ind
+            start_ind = end_ind
+            end_ind = tmp
+
+        fit_indices[start_ind:end_ind] = 1
         continue
 
-    fit_indices = numpy.concatenate(fit_indices)
+    fit_indices[numpy.isnan(spect)] = 0
+    fit_indices = numpy.where(fit_indices==1)
+    #fit_indices = numpy.argsort(numpy.concatenate(fit_indices))
     fitted_curve = numpy.polyfit(v[fit_indices], spect[fit_indices], deg=degree)
     fitted_spect = spect - numpy.polyval(fitted_curve, v)
 
     emission_flag = numpy.ones(len(spect))
     emission_flag[fit_indices] = 0
-    emission_flag[:fit_indices.min()] = -1
-    emission_flag[fit_indices.max():] = -1
+    emission_flag[:numpy.min(fit_indices)] = -1
+    emission_flag[numpy.max(fit_indices):] = -1
 
     return fitted_spect, emission_flag
 
 
-def basefit_auto(spect, v):
-    return spect
+def basefit_auto(spect, v, *args, **kwargs):
+    return basefit_simple(spect, v, *args, **kwargs)
 

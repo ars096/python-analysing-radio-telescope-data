@@ -35,11 +35,10 @@ def make_2d_map(cube, flag=None, axis='v', detection_mode=''):
     
     if flag is None:
         flag = numpy.zeros((nz, ny, nx))
-        pass
-    
+
     integ_hdu = make_integ_map(cube, flag, axis, detection_mode='')
-    rms_hdu = make_rms_map(cube, flag, axis, detection_mode='')
-    return integ_hdu, rms_hdu
+    #rms_hdu = make_rms_map(cube, flag, axis, detection_mode='')
+    return integ_hdu#, rms_hdu
 
 def make_integ_map(cube, flag=None, axis='v', detection_mode=''):
     import numpy, pyfits, time
@@ -48,11 +47,16 @@ def make_integ_map(cube, flag=None, axis='v', detection_mode=''):
     nz, ny, nx = cube.data.shape
     
     if axis in ['v', 'V', 'z', 'Z']:
-        integ = numpy.zeros((ny, nx))
-        for i in range(nx):
-            for j in range(ny):
-                integ[j,i] = numpy.sum(cube.data[numpy.where(flag.data[:,j,i] == 1),j,i])
-        
+        #integ = numpy.zeros((ny, nx))
+        #for i in range(nx):
+        #    for j in range(ny):
+        #        integ[j,i] = numpy.sum(cube.data[numpy.where(flag.data[:,j,i] == 1),j,i])
+        dcube = cube.data.copy()
+        dcube[numpy.where(flag.data!=1)] = 0
+        dcube[numpy.isnan(dcube)] = 0
+        dcube[numpy.isinf(dcube)] = 0
+        integ = numpy.sum(dcube, axis=0)
+
         header = cube.header.copy()
         header.pop('NAXIS3')
         header.pop('CRVAL3')

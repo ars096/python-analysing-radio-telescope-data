@@ -11,5 +11,7 @@ from basefunc.fits_io import loadfits
 from basefunc.fits_io import savefits
 from basefunc.makespec import makespec
 from basefunc.baseline_fit import basefit
-from basefunc.spectrum import get_tpeak as tpeak
+from basefunc.analyse_spec import make_2d_map
 from basefunc.sumspec import sumspec
+
+from plotter.plot_otf import draw_otf_ii
