@@ -50,5 +50,8 @@ def draw_otf_ii(data, flag=None, figure=None, subplot=None,
 
     fits_figure.show_colorbar()
 
+    if show:
+        pylab.show()
+
     return fits_figure
 
