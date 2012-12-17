@@ -14,9 +14,10 @@ from basefunc.baseline_fit import basefit
 from basefunc.analyse_spec import make_2d_map
 from basefunc.sumspec import sumspec
 
+from basefunc.useful import generate_axis
+
 from plotter.plot_otf import draw_map
-from plotter.plot_otf import custom_map_plotter
+from plotter.plot_otf import custom_draw_map
 from plotter.plot_otf import draw_otf
-from plotter.plot_otf import draw_otf_ii
-from plotter.plot_otf import draw_otf_rms
+from plotter.plot_otf import draw_otf_spectrum
 

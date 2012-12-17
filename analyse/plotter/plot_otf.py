@@ -5,13 +5,8 @@
 Documents
 """
 
-import analyse
-import analyse.plotter
 
-import pylab
-import aplpy
-
-def draw_map(data, figure=None, subplot=None,
+def draw_map(data, figure=None, subplot=111,
              vmin=0, vmax=None, pmin=None, pmax=100.0, cmap='default',
              smooth=None, kernel='gauss', grid=True, gcolor='k',
              contour=True, levels=11, ccmap='None', ccolors='k',
@@ -21,6 +16,10 @@ def draw_map(data, figure=None, subplot=None,
              tick_labels_size=9, colorber_font_size=8,
              font_family=None,
              show=True):
+    import analyse
+    import analyse.plotter
+    import aplpy
+    import pylab
     if figure is None:
         figure = pylab.figure()
     else:
@@ -73,46 +72,62 @@ def draw_map(data, figure=None, subplot=None,
     return fits_figure
 
 
-def custom_map_plotter(**kwargs):
+def custom_draw_map(**kwargs):
     import functools
     return functools.partial(draw_map, **kwargs)
 
 
-def draw_otf_ii(data, flag=None, *args, **kwargs):
-    if flag is None:
-        data, flag = analyse.basefit(data)
+def draw_otf_spectrum(cube, figure=None, subplot=111, title='', grid=True,
+                      font_family=None, tick_labels_size=9, show=True):
+    import analyse
+    import analyse.plotter
+    import pylab
+    import matplotlib
 
-    ii = analyse.make_2d_map(data, flag)
+    def_font_size = matplotlib.rcParams['font.size']
+    def_font_family = matplotlib.rcParams['font.family']
+    matplotlib.rcParams['font.size'] = tick_labels_size
+    if font_family is not None: matplotlib.rcParams['font.family'] = font_family
 
-    return draw_map(ii, *args, **kwargs)
+    if figure is None:
+        figure = pylab.figure()
+    else:
+        show = False
+
+    if type(subplot) is int:
+        subplot = analyse.plotter.get_subplot(subplot)
+    elif type(subplot) in [list, tuple]:
+        if len(subplot) == 3:
+            subplot = analyse.plotter.get_subplot(subplot)
+
+    nz, ny, nx = cube.data.shape
+    spectra = cube.data.T.reshape(nx*ny, nz)
+    v = analyse.generate_axis(cube, axis=3) / 1000.
+
+    ax = figure.add_axes(subplot)
+    [ax.plot(v, s) for s in spectra]
+    ax.grid(grid)
+    ax.set_title(title)
+
+    if show:
+        pylab.show()
+
+    matplotlib.rcParams['font.size'] = def_font_size
+    matplotlib.rcParams['font.family'] = def_font_family
+    return figure
 
 
-def draw_otf_rms(data, flag=None, *args, **kwargs):
-    if flag is None:
-        data, flag = analyse.basefit(data)
-
-    rms = analyse.make_2d_map(data, flag, 'rms')
-
-    return draw_map(rms, *args, **kwargs)
-
-
-def draw_otf(ii=None, rms=None, cube=None, flag=None, suptitle='', show=True,
+def draw_otf(ii=None, rms=None, cube=None, suptitle='', show=True,
              *args, **kwargs):
-    fig = pylab.figure(figsize=(10,5))
+    import pylab
+
+    fig = pylab.figure(figsize=(10,8))
     fig.suptitle(suptitle)
 
-    if ii is None:
-        draw_otf_ii(cube, flag, figure=fig, subplot=121, title='mom0', show=False,
-                    *args, **kwargs)
-    else:
-        draw_map(ii, figure=fig, subplot=121, title='mom0', show=False, *args, **kwargs)
-
-    if rms is None:
-        draw_otf_rms(cube, flag, figure=fig, subplot=122, title='rms', yaxis_label=False,
-                     show=False, *args, **kwargs)
-    else:
-        draw_map(rms, figure=fig, subplot=122, title='rms', yaxis_label=False,
-                 show=False, *args, **kwargs)
+    plot = custom_draw_map(figure=fig, show=False)
+    plot(ii, subplot=221, title='mom0', *args, **kwargs)
+    plot(rms, subplot=222, title='rms', yaxis_label=False, *args, **kwargs)
+    draw_otf_spectrum(cube, figure=fig, subplot=212, title='spectra', *args, **kwargs)
 
     if show:
         pylab.show()
