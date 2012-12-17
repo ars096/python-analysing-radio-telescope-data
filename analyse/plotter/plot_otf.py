@@ -78,7 +78,7 @@ def custom_draw_map(**kwargs):
 
 
 def draw_otf_spectrum(cube, figure=None, subplot=111, title='', grid=True,
-                      font_family=None, tick_labels_size=9, show=True):
+                      font_family=None, tick_labels_size=9, show=True, *args, **kwargs):
     import analyse
     import analyse.plotter
     import pylab

@@ -133,3 +133,164 @@ def cut_small_sample(d, nsig=1, mincount=5, threshold=None, *args, **kwargs):
         checking.append(i)
         continue
     return dd
+
+
+def basefit_interactive(data, flag):
+    ibase = interactive_basefit(data, flag)
+    ibase.generate_ii()
+    ibase.generate_rms()
+    ibase.start()
+    return
+
+class interactive_basefit(object):
+    smooth = 1
+
+    def __init__(self, cube, flag=None):
+        self.cube = cube
+        self.flag = flag
+        self.shape = cube.data.shape
+        self.size = cube.data.size
+        self.nz = self.shape[0]
+        self.ny = self.shape[1]
+        self.nx = self.shape[2]
+        pass
+
+    def set_ii(self, ii):
+        self.ii = ii
+        return
+
+    def set_rms(self, rms):
+        self.rms = rms
+        return
+
+    def generate_flag(self):
+        import analyse
+        self.flag = analyse.basefit(self.cube)
+        return
+
+    def generate_ii(self):
+        import analyse
+        self.ii = analyse.make_2d_map(self.cube, self.flag)
+        return
+
+    def generate_rms(self):
+        import analyse
+        self.rms = analyse.make_2d_map(self.cube, self.flag, 'rms')
+        return
+
+    def _key_handler(self, event):
+        key = event.key
+        print('[%s]'%key),
+        if key=='right': self._key_right()
+        elif key=='left': self._key_left()
+        elif key=='up': self._key_up()
+        elif key=='down': self._key_down()
+        elif key in ['h', '?']: self._key_h()
+        elif key=='q': self._key_q()
+        elif key=='b': self._key_b()
+        elif key=='x': self._key_x()
+        print('.')
+        return
+
+    def _key_right(self):
+        self.current_position += 1
+        self.check_current_position()
+        return
+
+    def _key_left(self):
+        self.current_position -= 1
+        self.check_current_position()
+        return
+
+    def _key_up(self):
+        self.current_position += self.nx
+        self.check_current_position()
+        return
+
+    def _key_down(self):
+        self.current_position -= self.nx
+        self.check_current_position()
+        return
+
+    def _key_h(self):
+        import pylab
+        print('-- help')
+        print('right, left, up, down : move')
+        print('h, ? : show help')
+        print('q    : quit')
+        print('b    : bindup')
+        print('x    : set xlim')
+        print('y    : set ylim')
+        return
+
+    def _key_q(self):
+        import pylab
+        print('quit'),
+        pylab.close(self.fig)
+        return
+
+    def _key_b(self):
+        self.smooth = int(raw_input('bindup: '))
+        return
+
+    def _key_x(self):
+        return
+
+    def _key_y(self):
+        return
+
+    def check_current_position(self):
+        if self.current_position < 0:
+            self.current_position = 0
+        elif self.current_position >= self.size:
+            self.current_position = self.size - 1
+        print('currend_position = %d'%self.current_position),
+        return
+
+    def start(self):
+        import matplotlib.animation
+        import pylab
+        import analyse
+
+        self.current_position = 0
+
+        self.fig = pylab.figure()
+        analyse.draw_map(self.ii, figure=self.fig, subplot=221)
+        self.ax1 = self.fig.axes[-2]
+        analyse.draw_map(self.rms, figure=self.fig, subplot=222)
+        self.ax2 = self.fig.axes[-2]
+        self.line11, = self.ax1.plot([], [], 'w*', markersize=15)
+        self.line21, = self.ax2.plot([], [], 'w*', markersize=15)
+        self.ax3 = self.fig.add_subplot(212)
+        self.ax3.set_xlim(0, self.nz)
+        self.ax3.set_ylim(-5, 20)
+        self.ax3.grid(True)
+        self.line31, = self.ax3.plot([], [], 'b')
+        self.line32, = self.ax3.plot([], [], 'c')
+        self.fig.canvas.mpl_connect('key_press_event', self._key_handler)
+        anime = matplotlib.animation.FuncAnimation(self.fig, self.refresh, frames=self._dummy_itt,
+                                                   interval=50, blit=False)
+        pylab.show()
+        return
+
+    def _dummy_itt(self):
+        while True:
+            yield 0
+
+    def refresh(self, *args):
+        import numpy
+        import time
+        x = self.current_position % self.nx
+        y = self.current_position / self.nx
+        spectrum = self.cube.data[:,y,x]
+        spectrum = numpy.convolve(spectrum, numpy.ones(self.smooth)/float(self.smooth), 'same')
+        flag = self.flag.data[:,y,x]
+        self.line11.set_data([x+0.5,], [y+0.5,])
+        self.line21.set_data([x+0.5,], [y+0,5,])
+        self.line31.set_data(numpy.arange(len(spectrum)), spectrum)
+        self.line32.set_data(numpy.where(flag==0)[0], spectrum[numpy.where(flag==0)])
+        #self.fig.canvas.draw()
+        return
+
+
+
