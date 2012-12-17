@@ -32,7 +32,7 @@ def basefit(hdu, mode='auto', *args, **kwargs):
     return pyfits.PrimaryHDU(fitted, header), pyfits.PrimaryHDU(emission_flag, ef_header)
 
 
-def basefit_simple(spect, v, fitting_part=None, degree=1):
+def basefit_simple(spect, v, fitting_part=None, degree=1, *args, **kwargs):
     import numpy
 
     if fitting_part is None:
@@ -114,7 +114,7 @@ def rms(d):
     dd = d[numpy.where(d==d)]
     return numpy.sqrt(numpy.sum(dd**2.)/float(len(dd)))
 
-def cut_small_sample(d, nsig=1, mincount=5, threshold=None):
+def cut_small_sample(d, nsig=1, mincount=5, threshold=None, *args, **kwargs):
     dd = d.copy()
     if nsig==0: dd[numpy.where(dd<0)] = 0.
     else:

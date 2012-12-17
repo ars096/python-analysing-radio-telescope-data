@@ -36,9 +36,11 @@ def make_2d_map(cube, flag=None, axis='v', detection_mode=''):
     if flag is None:
         flag = numpy.zeros((nz, ny, nx))
 
-    integ_hdu = make_integ_map(cube, flag, axis, detection_mode='')
-    #rms_hdu = make_rms_map(cube, flag, axis, detection_mode='')
-    return integ_hdu#, rms_hdu
+    if axis.lower() == 'rms':
+        return make_rms_map(cube, flag, axis, detection_mode='')
+    else:
+        return make_integ_map(cube, flag, axis, detection_mode='')
+
 
 def make_integ_map(cube, flag=None, axis='v', detection_mode=''):
     import numpy, pyfits, time
