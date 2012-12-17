@@ -18,7 +18,7 @@ def basefit(hdu, mode='auto', *args, **kwargs):
     cdelt3 = hdu.header['CDELT3']
     v = (numpy.arange(nz) - crpix3) * cdelt3 + crval3
     spectra = hdu.data.copy().T.reshape(nx*ny, nz)
-    fit_results = [fitfunc(spec, v, *args, **kwargs) for spec in spectra]
+    fit_results = [fitfunc(i, spec, v, *args, **kwargs) for i,spec in enumerate(spectra)]
     fitted = numpy.array(fit_results)[:,0].reshape(nx, ny, nz).T
     emission_flag = numpy.array(fit_results)[:,1].reshape(nx, ny, nz).T
 
@@ -32,7 +32,7 @@ def basefit(hdu, mode='auto', *args, **kwargs):
     return pyfits.PrimaryHDU(fitted, header), pyfits.PrimaryHDU(emission_flag, ef_header)
 
 
-def basefit_simple(spect, v, fitting_part=None, degree=1, *args, **kwargs):
+def basefit_simple(i, spect, v, fitting_part=None, degree=1, *args, **kwargs):
     import numpy
 
     if fitting_part is None:
@@ -67,42 +67,34 @@ def basefit_simple(spect, v, fitting_part=None, degree=1, *args, **kwargs):
     return fitted_spect, emission_flag
 
 
-def basefit_auto(spect, v, fitting_range=[None,None], degree=1,
-                 smooth=5, nsig=1.2, maxittr=10):
+def basefit_auto(i, spect, v, fitting_range=[-150,150], degree=1,
+                 smooth=21, mincount=21, nsig=2):
     import numpy
+    import sys
+    if i%10==0:
+        print(i),
+        sys.stdout.flush()
+        pass
 
     if fitting_range[0] is not None:
-        smaller_ind = spect[numpy.where(v<fitting_range[0]*1000.)]
-    else: smaller_ind = []
+        smaller_ind = numpy.where(v<fitting_range[0]*1000.)
+    else: smaller_ind = [0,]
     if fitting_range[1] is not None:
-        larger_ind =  spect[numpy.where(v>fitting_range[1]*1000.)]
-    else: larger_ind = []
+        larger_ind =  numpy.where(v>fitting_range[1]*1000.)
+    else: larger_ind = [0,]
 
     fit_d = spect.copy()
-    fit_d[smaller_ind] = 0
-    fit_d[larger_ind] = 0
+    fit_d[smaller_ind] = 0.
+    fit_d[larger_ind] = 0.
     fit_d = numpy.convolve(fit_d, numpy.ones(smooth)/float(smooth), 'same')
-    fit_d[smaller_ind] = numpy.nan
-    fit_d[larger_ind] = numpy.nan
-    initial_rms = rms(fit_d)
-    rms_history = [initial_rms]
-    threshold = initial_rms
-    for i in xrange(maxittr):
-        d = fit_d.copy()
-        d[numpy.where(d > threshold*nsig)] = numpy.nan
-        next_rms = rms(d)
-        rms_history.append(next_rms)
-        if next_rms*nsig > threshold: break
-        threshold = next_rms
-        continue
+    fit_d = cut_small_sample(fit_d, nsig=nsig, mincount=mincount)
 
-    fit_indices = numpy.where(d==d)
+    fit_indices = numpy.where(fit_d==0)
     fitted_curve = numpy.polyfit(v[fit_indices], spect[fit_indices], deg=degree)
     fitted_spect = spect - numpy.polyval(fitted_curve, v)
 
     emission_flag = numpy.ones(len(spect))
     emission_flag[fit_indices] = 0
-
     return fitted_spect, emission_flag
 
 
@@ -114,7 +106,27 @@ def rms(d):
     dd = d[numpy.where(d==d)]
     return numpy.sqrt(numpy.sum(dd**2.)/float(len(dd)))
 
-def cut_small_sample(d, nsig=1, mincount=5, threshold=None, *args, **kwargs):
+
+def rms_itt(d, nsig=2, maxittr=10, return_history=False):
+    import numpy
+
+    initial_rms = rms(d)
+    rms_history = [initial_rms]
+    threshold = initial_rms
+    for i in xrange(maxittr):
+        _d = d.copy()
+        _d[numpy.where(_d > threshold*nsig)] = 0.
+        next_rms = rms(_d)
+        rms_history.append(next_rms)
+        if next_rms*nsig > threshold: break
+        threshold = next_rms
+        continue
+    if return_history: return next_rms, rms_history
+    return next_rms
+
+def cut_small_sample(d, nsig=1, mincount=5, threshold=None):
+    import numpy
+
     dd = d.copy()
     if nsig==0: dd[numpy.where(dd<0)] = 0.
     else:
