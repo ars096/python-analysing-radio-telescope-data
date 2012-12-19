@@ -5,6 +5,7 @@
 Documents
 """
 
+default_colors = ['b', 'g', 'r', 'c', 'm', 'k']
 
 def get_subplot(*args, **kwargs):
     import pylab

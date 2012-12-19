@@ -140,6 +140,10 @@ def convolve(data, width, kernel_type='gauss'):
     import numpy
     import scipy.signal
     import pyfits
+    import sys
+
+    print('convolve: width=%.2f'%(width)),
+    sys.stdout.flush()
 
     if kernel_type.lower()=='gauss': kernel_func = gaussian_kernel
     else: kernel_func = gaussian_kernel
@@ -154,6 +158,7 @@ def convolve(data, width, kernel_type='gauss'):
     header.add_history('pyanalyse.convolve: time stamp (%s)'%time.strftime('%Y/%m/%d %H:%M:%S'))
 
     convolved_hdu = pyfits.PrimaryHDU(cd, header)
+    print('')
     return convolved_hdu
 
 

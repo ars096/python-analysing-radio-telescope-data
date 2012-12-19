@@ -22,4 +22,6 @@ from plotter.plot_otf import draw_map
 from plotter.plot_otf import custom_draw_map
 from plotter.plot_otf import draw_otf
 from plotter.plot_otf import draw_otf_spectrum
+from plotter import default_colors
 
+from viewer.show_spectrum import show_spectrum_simple
