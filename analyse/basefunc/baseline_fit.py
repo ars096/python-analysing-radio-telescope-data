@@ -6,21 +6,17 @@ def basefit(hdu, mode='auto', *args, **kwargs):
     import time
     import numpy
     import pyfits
+    import analyse
+
+    print('basefit: mode=%s'%(mode))
 
     if mode.lower()=='simple':
         fitfunc = basefit_simple
     elif mode.lower()=='auto':
         fitfunc = basefit_auto
 
-    nz, ny, nx = hdu.data.shape
-    crpix3 = hdu.header['CRPIX3']
-    crval3 = hdu.header['CRVAL3']
-    cdelt3 = hdu.header['CDELT3']
-    v = (numpy.arange(nz) - crpix3) * cdelt3 + crval3
-    spectra = hdu.data.copy().T.reshape(nx*ny, nz)
-    fit_results = [fitfunc(i, spec, v, *args, **kwargs) for i,spec in enumerate(spectra)]
-    fitted = numpy.array(fit_results)[:,0].reshape(nx, ny, nz).T
-    emission_flag = numpy.array(fit_results)[:,1].reshape(nx, ny, nz).T
+    v = analyse.generate_axis(hdu, axis=3)
+    fitted, emission_flag = fitfunc(hdu, v, *args, **kwargs)
 
     header = hdu.header.copy()
     header.add_history('pyanalyse.basefit: generate fitted data (mode:%s)'%mode)
@@ -29,10 +25,25 @@ def basefit(hdu, mode='auto', *args, **kwargs):
     ef_header = hdu.header.copy()
     ef_header.add_history('pyanalyse.basefit: generate emission flag (mode:%s)'%mode)
     ef_header.add_history('pyanalyse.basefit: time stamp (%s)'%time.strftime('%Y/%m/%d %H:%M:%S'))
-    return pyfits.PrimaryHDU(fitted, header), pyfits.PrimaryHDU(emission_flag, ef_header)
+
+    fitted_data = pyfits.PrimaryHDU(fitted, header)
+    flag = pyfits.PrimaryHDU(emission_flag, ef_header)
+
+    return fitted_data, flag
 
 
-def basefit_simple(i, spect, v, fitting_part=None, degree=1, *args, **kwargs):
+def basefit_simple(hdu, v, fitting_part=None, degree=1, *args, **kwargs):
+    import numpy
+    cube = hdu.data
+    nz, ny, nx = cube.shape
+    spectra = cube.T.reshape(nx*ny, nz)
+    fit_results = [basefit_simple_line(i, spec, v, fitting_part, degree) for i,spec in enumerate(spectra)]
+    fit_results = numpy.array(fit_results)
+    fitted = numpy.array(fit_results[:,0].reshape(nx, ny, nz).T, dtype=numpy.float32)
+    emission_flag = numpy.array(fit_results[:,1].reshape(nx, ny, nz).T, dtype=numpy.int16)
+    return fitted, emission_flag
+
+def basefit_simple_line(num, spect, v, fitting_part, degree):
     import numpy
 
     if fitting_part is None:
@@ -67,8 +78,43 @@ def basefit_simple(i, spect, v, fitting_part=None, degree=1, *args, **kwargs):
     return fitted_spect, emission_flag
 
 
-def basefit_auto(i, spect, v, fitting_range=[-150,150], degree=1,
-                 smooth=21, mincount=21, nsig=2):
+def basefit_flag(cube, flag, degree=1):
+    import numpy
+    nz, ny, nx = cube.shape
+    spectra = cube.T.reshape(nx*ny, nz)
+    flags = flag.T.reshape(nx*ny, nz)
+
+    fitted = [basefit_flag_line(s, f, degree) for s,f in zip(spectra, flags)]
+    fitted = numpy.array(fitted, dtype=numpy.float32).reshape(nx, ny, nz).T
+    return fitted
+
+def basefit_flag_line(spect, flag, degree):
+    import numpy
+    x = numpy.arange(len(spect))
+    use = numpy.where(flag==0)
+    fitted_curve = numpy.polyfit(x[use], spect[use], deg=degree)
+    fitted_spect = spect - numpy.polyval(fitted_curve, x)
+    fitted_spect[numpy.where((flag!=0)&(flag!=1))] = numpy.nan
+    return fitted_spect
+
+
+def basefit_auto(hdu, v, fitting_range=[-150, 150], degree=1,
+                 smooth=21, mincount=21, nsig=2, convolve=5):
+    import numpy
+    import analyse
+    cube = hdu.data
+    nz, ny, nx = cube.shape
+    ccube = analyse.convolve(hdu, convolve)
+    spectra = ccube.data.T.reshape(nx*ny, nz)
+    fit_results = [basefit_auto_line(i, spec, v, fitting_range, degree, smooth, mincount, nsig) \
+                   for i,spec in enumerate(spectra)]
+    fit_results = numpy.array(fit_results)
+    emission_flag = numpy.array(fit_results[:,1].reshape(nx, ny, nz).T, dtype=numpy.int16)
+    fitted = basefit_flag(cube, emission_flag)
+    return fitted, emission_flag
+
+def basefit_auto_line(i, spect, v, fitting_range, degree,
+                      smooth, mincount, nsig):
     import numpy
     import sys
     if i%10==0:
@@ -84,19 +130,24 @@ def basefit_auto(i, spect, v, fitting_range=[-150,150], degree=1,
     else: larger_ind = [0,]
 
     fit_d = spect.copy()
-    fit_d[smaller_ind] = 0.
-    fit_d[larger_ind] = 0.
+    fit_d[smaller_ind] = 0
+    fit_d[larger_ind] = 0
     fit_d = numpy.convolve(fit_d, numpy.ones(smooth)/float(smooth), 'same')
+    fit_d[smaller_ind] = numpy.nan
+    fit_d[larger_ind] = numpy.nan
     fit_d = cut_small_sample(fit_d, nsig=nsig, mincount=mincount)
 
-    fit_indices = numpy.where(fit_d==0)
+    fit_indices = numpy.where((fit_d==0)&(fit_d==fit_d))
     fitted_curve = numpy.polyfit(v[fit_indices], spect[fit_indices], deg=degree)
     fitted_spect = spect - numpy.polyval(fitted_curve, v)
+    fitted_spect[smaller_ind] = numpy.nan
+    fitted_spect[larger_ind] = numpy.nan
 
     emission_flag = numpy.ones(len(spect))
     emission_flag[fit_indices] = 0
+    emission_flag[smaller_ind] = -1
+    emission_flag[larger_ind] = -1
     return fitted_spect, emission_flag
-
 
 def nearest_index(target, indices):
     return numpy.array((indices - target)**2.).argmin()
@@ -104,8 +155,8 @@ def nearest_index(target, indices):
 def rms(d):
     import numpy
     dd = d[numpy.where(d==d)]
-    return numpy.sqrt(numpy.sum(dd**2.)/float(len(dd)))
-
+    rms = numpy.sqrt(numpy.sum(dd**2.)/float(len(dd)))
+    return rms
 
 def rms_itt(d, nsig=2, maxittr=10, return_history=False):
     import numpy

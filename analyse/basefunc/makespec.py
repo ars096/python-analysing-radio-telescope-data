@@ -6,7 +6,10 @@ Documents
 """
 
 def makespec(hdu):
+    print('makespec:'),
+
     obs_mode = hdu.data['OBSMODE'][0].upper()
+    print('obsmode-->%s'%(obs_mode))
 
     if obs_mode=='PS':
         return makespec_ps(hdu)

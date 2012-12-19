@@ -30,7 +30,9 @@ def _tpeak(spec, _smooth_num=5):
 
 def make_2d_map(cube, flag=None, axis='v', detection_mode=''):
     import numpy
-    
+
+    print('make_2d_map: axis=%s'%(axis))
+
     nz, ny, nx = cube.data.shape
     
     if flag is None:
@@ -132,3 +134,42 @@ def make_rms_map(cube, flag=None, axis='v', detection_mode=''):
     rms_hdu = pyfits.PrimaryHDU(rms, header)
     return rms_hdu
 
+
+def convolve(data, width, kernel_type='gauss'):
+    import time
+    import numpy
+    import scipy.signal
+    import pyfits
+
+    if kernel_type.lower()=='gauss': kernel_func = gaussian_kernel
+    else: kernel_func = gaussian_kernel
+
+    d = numpy.array(data.data, dtype=numpy.float32)
+    k = kernel_func(width)
+
+    cd = numpy.array([scipy.signal.fftconvolve(_d, k, 'same') for _d in d], dtype=numpy.float32)
+
+    header = data.header.copy()
+    header.add_history('pyanalyse.convolve: convolved type=%s width=%.1f'%(kernel_func, width))
+    header.add_history('pyanalyse.convolve: time stamp (%s)'%time.strftime('%Y/%m/%d %H:%M:%S'))
+
+    convolved_hdu = pyfits.PrimaryHDU(cd, header)
+    return convolved_hdu
+
+
+def gaussian_kernel(hpbw, dim=2):
+    import numpy
+    from numpy import log as ln
+    from numpy import sqrt
+    sigma = hpbw / 2. / sqrt(2 * ln(2))
+    sigma2 = 2 * sigma**2.
+    s = int(hpbw/2. * 3 + 1)
+    if dim == 1:
+        x = numpy.mgrid[-s:s+1]
+        g = numpy.exp(-(x ** 2 / sigma2))
+    elif dim == 2:
+        x, y = numpy.mgrid[-s:s+1, -s:s+1]
+        g = numpy.exp(-(x ** 2 / sigma2 + y ** 2 / sigma2))
+    else:
+        return None
+    return numpy.array(g/g.sum(), dtype=numpy.float32)

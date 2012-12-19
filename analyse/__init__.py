@@ -13,6 +13,7 @@ from basefunc.makespec import makespec
 from basefunc.baseline_fit import basefit
 from basefunc.baseline_fit import basefit_interactive
 from basefunc.analyse_spec import make_2d_map
+from basefunc.analyse_spec import convolve
 from basefunc.sumspec import sumspec
 
 from basefunc.useful import generate_axis
