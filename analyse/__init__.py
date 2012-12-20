@@ -25,3 +25,4 @@ from plotter.plot_otf import draw_otf_spectrum
 from plotter import default_colors
 
 from viewer.show_spectrum import show_spectrum_simple
+from viewer.show_spectrum import show_fittings_simple

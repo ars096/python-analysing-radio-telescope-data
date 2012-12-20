@@ -99,7 +99,7 @@ def basefit_flag_line(spect, flag, degree):
 
 
 def basefit_auto(hdu, v, fitting_range=[-150, 150], degree=1,
-                 smooth=21, mincount=21, nsig=2, convolve=5):
+                 smooth=21, mincount=41, nsig=1.3, convolve=5):
     import numpy
     import analyse
     cube = hdu.data

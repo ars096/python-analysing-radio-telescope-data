@@ -25,6 +25,12 @@ def show_spectrum_simple(data, *args, **kwargs):
     view.start()
     return
 
+def show_fittings_simple(data, flag, *args, **kwargs):
+    view = viewer_fittings_simple(data, flag)
+    if kwargs.has_key('colors'): view.set_colors(kwargs['colors'])
+    view.start()
+    return
+
 
 class viewer_spectrum_simple(object):
     help_str = ''
@@ -220,7 +226,7 @@ class viewer_spectrum_simple(object):
         return
 
     def _move_delta(self, dx=0, dy=0):
-        dind = dx + dy * self.ny
+        dind = dx + dy * self.nx
         self.set_current_position(self.current_position + dind)
         return
 
@@ -266,26 +272,59 @@ class viewer_fittings_simple(viewer_spectrum_simple):
         self.flag = flag
         pass
 
-    def start(self):
+    def start(self, show=True):
+        import matplotlib.animation
         import pylab
 
-        viewer_spectrum_simple.start(self, show=False)
-        self.flag_line = self.ax.plot([],[],'c')
-        pylab.show()
+        def dummy_itt():
+            while True:
+                yield
+                continue
+            return
+
+        self.current_position = 0
+
+        fig = pylab.figure()
+        ax = fig.add_subplot(111)
+        ax.grid(True)
+        title = ax.set_title('')
+        lines = [ax.plot([], [], color=self.colors[i]) for i in range(len(self.cube_list))]
+        flag_line = ax.plot([],[],'c')
+        ax.set_xlim(self.xmin, self.xmax)
+        ax.set_ylim(self.ymin, self.ymax)
+        fig.canvas.mpl_connect('key_press_event', self._key_handler)
+
+        self.fig = fig
+        self.ax = ax
+        self.title = title
+        self.lines = lines
+        self.flag_line = flag_line
+
+        anime = matplotlib.animation.FuncAnimation(fig, self._refresh, frames=dummy_itt,
+                                                   interval=50, blit=False)
+        if show: pylab.show()
         return
 
     def _refresh(self, *args):
-        return
-        """
-        viewer_spectrum_simple._refresh(self, *args)
+        import numpy
 
         x = self.current_position % self.nx
         y = self.current_position / self.nx
-        vel = self.vels[0]
-        spectrum = self.cube.
-        self.flag_line[0].set_data(vel, spectrum)
+
+        self.title.set_text('%d, (x=%d, y=%d)'%(self.current_position, x, y))
+
+        flag_flag = True
+        for cube, line, vel in zip(self.cube_list, self.lines, self.vels):
+            spectrum = cube.data[:,y,x]
+            spectrum = numpy.convolve(spectrum,
+                                      numpy.ones(self.bindup_num)/float(self.bindup_num),
+                                      'same')
+            line[0].set_data(vel, spectrum)
+            if flag_flag:
+                flag = numpy.where(self.flag.data[:,y,x] == 0)
+                self.flag_line[0].set_data(vel[flag], spectrum[flag])
+                flag_flag = False
+                pass
+            continue
         return
-        """
-
-
 
