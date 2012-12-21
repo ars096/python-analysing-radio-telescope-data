@@ -33,7 +33,6 @@ def qlook_otf(dirpath, filesave=False):
 
     name = fits_files[0].split('_12CO_H.fits')[0]
 
-    """
     os.system('python %s %s'%(__file__, dirpath+fits_files[0]))
 
     flag_path = dirpath+f[0]+'.qlook.flag.fits'
@@ -41,7 +40,6 @@ def qlook_otf(dirpath, filesave=False):
     for f in fits_files:
         os.system('python %s %s %s'%(__file__, dirpath+f, dirpath+flag_path))
         continue
-    """
 
     isotope = ['12CO', '13CO', 'C18O']
     plot = analyse.custom_draw_map(xspacing=0.2, yspacing=0.2, tick_labels_size=7,
