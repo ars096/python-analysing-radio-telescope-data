@@ -36,9 +36,11 @@ def qlook_otf(dirpath, filesave=False):
     os.system('python %s %s'%(__file__, dirpath+fits_files[0]))
 
     flag_path = dirpath+f[0]+'.qlook.flag.fits'
+    """
     for f in fits_files:
         os.system('python %s %s %s'%(__file__, dirpath+f, dirpath+flag_path))
         continue
+    """
 
     isotope = ['12CO', '13CO', 'C18O']
     fig = pylab.figure()

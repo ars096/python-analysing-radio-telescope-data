@@ -104,7 +104,12 @@ def basefit_auto(hdu, v, fitting_range=[-150, 150], degree=1,
     import analyse
     cube = hdu.data
     nz, ny, nx = cube.shape
-    ccube = analyse.convolve(hdu, convolve)
+    if hdu.header['_OBS-MOD']=='otf':
+        ccube = analyse.convolve(hdu, convolve)
+    else:
+        ccube = hdu
+        pass
+
     spectra = ccube.data.T.reshape(nx*ny, nz)
     fit_results = [basefit_auto_line(i, spec, v, fitting_range, degree, smooth, mincount, nsig) \
                    for i,spec in enumerate(spectra)]
