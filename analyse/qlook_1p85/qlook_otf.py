@@ -33,41 +33,47 @@ def qlook_otf(dirpath, filesave=False):
 
     name = fits_files[0].split('_12CO_H.fits')[0]
 
+    """
     os.system('python %s %s'%(__file__, dirpath+fits_files[0]))
 
     flag_path = dirpath+f[0]+'.qlook.flag.fits'
-    """
+
     for f in fits_files:
         os.system('python %s %s %s'%(__file__, dirpath+f, dirpath+flag_path))
         continue
     """
 
     isotope = ['12CO', '13CO', 'C18O']
-    fig = pylab.figure()
+    plot = analyse.custom_draw_map(xspacing=0.2, yspacing=0.2, tick_labels_size=7,
+                                   colorber_font_size=6, show=False)
+
+    fig = pylab.figure(figsize=(12,10))
     fig.suptitle(name)
     for i, f in enumerate(fits_files[::2]):
         _name = dirpath+f.split('.fits')[0]
         cube = analyse.loadfits(_name+'.qlook.data.fits')
         ii = analyse.loadfits(_name+'.qlook.ii.fits')
         rms = analyse.loadfits(_name+'.qlook.rms.fits')
-        analyse.draw_map(ii, figure=fig, subplot=331+3*i, title='mom0: '+isotope[i], show=False)
-        analyse.draw_map(rms, figure=fig, subplot=332+3*i, title='rms: '+isotope[i], show=False)
+        plot(ii, figure=fig, subplot=331+3*i, title='mom0: '+isotope[i])
+        plot(rms, figure=fig, subplot=332+3*i, title='rms: '+isotope[i])
         analyse.draw_otf_spectrum(cube, figure=fig, subplot=333+3*i, title='spectra: '+isotope[i], show=False)
         continue
     fig.savefig(dirpath+name+'_H.png')
+    pylab.close(fig)
 
-    fig = pylab.figure()
+    fig = pylab.figure(figsize=(12,10))
     fig.suptitle(name)
-    for i, f in enumerate(files[1::2]):
+    for i, f in enumerate(fits_files[1::2]):
         _name = dirpath+f.split('.fits')[0]
         cube = analyse.loadfits(_name+'.qlook.data.fits')
         ii = analyse.loadfits(_name+'.qlook.ii.fits')
         rms = analyse.loadfits(_name+'.qlook.rms.fits')
-        analyse.draw_map(ii, figure=fig, subplot=331+3*i, title='mom0: '+isotope[i], show=False)
-        analyse.draw_map(rms, figure=fig, subplot=332+3*i, title='rms: '+isotope[i], show=False)
+        plot(ii, figure=fig, subplot=331+3*i, title='mom0: '+isotope[i])
+        plot(rms, figure=fig, subplot=332+3*i, title='rms: '+isotope[i])
         analyse.draw_otf_spectrum(cube, figure=fig, subplot=333+3*i, title='spectra: '+isotope[i], show=False)
         continue
     fig.savefig(dirpath+name+'_V.png')
+    pylab.close(fig)
     return
 
 

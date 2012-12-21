@@ -44,7 +44,7 @@ def draw_map(data, figure=None, subplot=111,
     fits_figure.show_colorbar()
 
     if title!='':
-        fits_figure._figure.axes[-2].set_title(title)
+        fits_figure._figure.axes[-2].set_title(title, size=tick_labels_size+1)
 
     if not xaxis_label:
         fits_figure.hide_xaxis_label()
@@ -107,7 +107,11 @@ def draw_otf_spectrum(cube, figure=None, subplot=111, title='', grid=True,
     ax = figure.add_axes(subplot)
     [ax.plot(v, s) for s in spectra]
     ax.grid(grid)
-    ax.set_title(title)
+    ax.set_title(title, size=tick_labels_size+1)
+    lx = ax.get_xticklabels()
+    ly = ax.get_yticklabels()
+    ax.set_xticklabels([_l._x for _l in lx], size=tick_labels_size)
+    ax.set_yticklabels([_l._y for _l in ly], size=tick_labels_size)
 
     if show:
         pylab.show()
