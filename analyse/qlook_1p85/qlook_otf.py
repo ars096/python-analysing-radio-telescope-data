@@ -32,11 +32,9 @@ def qlook_otf(dirpath, filesave=False):
         continue
 
     name = fits_files[0].split('_12CO_H.fits')[0]
-
-    os.system('python %s %s'%(__file__, dirpath+fits_files[0]))
-
     flag_path = dirpath+f[0]+'.qlook.flag.fits'
 
+    os.system('python %s %s'%(__file__, dirpath+fits_files[0]))
     for f in fits_files:
         os.system('python %s %s %s'%(__file__, dirpath+f, dirpath+flag_path))
         continue

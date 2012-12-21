@@ -78,7 +78,8 @@ def custom_draw_map(**kwargs):
 
 
 def draw_otf_spectrum(cube, figure=None, subplot=111, title='', grid=True,
-                      font_family=None, tick_labels_size=9, show=True, *args, **kwargs):
+                      font_family=None, tick_labels_size=9, xlim=None, ylim=None,
+                      show=True, *args, **kwargs):
     import analyse
     import analyse.plotter
     import pylab
@@ -108,10 +109,12 @@ def draw_otf_spectrum(cube, figure=None, subplot=111, title='', grid=True,
     [ax.plot(v, s) for s in spectra]
     ax.grid(grid)
     ax.set_title(title, size=tick_labels_size+1)
-    lx = ax.get_xticklabels()
-    ly = ax.get_yticklabels()
-    ax.set_xticklabels([_l._x for _l in lx], size=tick_labels_size)
-    ax.set_yticklabels([_l._y for _l in ly], size=tick_labels_size)
+    if xlim is not None: ax.set_xlim(*xlim)
+    if ylim is not None: ax.set_ylim(*ylim)
+    tx = ax.get_xticks()
+    ty = ax.get_yticks()
+    ax.set_xticklabels(tx, size=tick_labels_size)
+    ax.set_yticklabels(ty, size=tick_labels_size)
 
     if show:
         pylab.show()
