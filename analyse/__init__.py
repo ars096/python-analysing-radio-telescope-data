@@ -11,6 +11,7 @@ from basefunc.fits_io import loadfits
 from basefunc.fits_io import savefits
 from basefunc.makespec import makespec
 from basefunc.baseline_fit import basefit
+from basefunc.baseline_fit import basefit_flag
 from basefunc.baseline_fit import basefit_interactive
 from basefunc.analyse_spec import make_2d_map
 from basefunc.analyse_spec import convolve

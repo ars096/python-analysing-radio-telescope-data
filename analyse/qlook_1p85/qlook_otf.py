@@ -6,9 +6,13 @@ Documents
 """
 
 
-def qlook_otf(dirpath, filesave=False):
+def qlook_otf(dirpath, filesave=False, reduct=True):
     import os
+    import time
     import pylab
+    import Image
+    import ImageDraw
+    import ImageFont
     import analyse
 
     if dirpath[-1]!='/': dirpath += '/'
@@ -19,60 +23,90 @@ def qlook_otf(dirpath, filesave=False):
         print(files)
         return
 
+    qdir = dirpath + 'qlook/'
+    if not os.path.exists(qdir):
+        os.mkdir(qdir)
+
+
     fits12 = []
     fits13 = []
     fits18 = []
     # file check
     for f in files:
-        if not f.endwith('fits'): continue
-        if f.split('.')[-3]=='qlook':
-            continue
-        fits_files.append(f)
+        if not f.endswith('fits'): continue
+        if f.find('qlook')!=-1: continue
+        if f.find('12CO')!=-1: fits12.append(f)
+        if f.find('13CO')!=-1: fits13.append(f)
+        if f.find('C18O')!=-1: fits18.append(f)
         continue
 
-    name = fits_files[0].split('_12CO_H.fits')[0]
-    flag_path = dirpath+f[0]+'.qlook.flag.fits'
+    name = fits12[0].split('_12CO_')[0]
+    flag_ex = '.qlook.flag.fits'
 
-    os.system('python %s %s'%(__file__, dirpath+fits_files[0]))
-    for f in fits_files:
-        os.system('python %s %s %s'%(__file__, dirpath+f, dirpath+flag_path))
-        continue
+    if reduct:
+        os.system('python %s %s %s'%(__file__, dirpath+fits12[0], qdir))
+        os.system('python %s %s %s %s'%(__file__, dirpath+fits12[1], qdir, qdir+fits12[0][:-5]+flag_ex))
+        os.system('python %s %s %s'%(__file__, dirpath+fits13[0], qdir))
+        os.system('python %s %s %s %s'%(__file__, dirpath+fits13[1], qdir, qdir+fits13[0][:-5]+flag_ex))
+        os.system('python %s %s %s'%(__file__, dirpath+fits18[0], qdir))
+        os.system('python %s %s %s %s'%(__file__, dirpath+fits18[1], qdir, qdir+fits18[0][:-5]+flag_ex))
+        pass
 
-    isotope = ['12CO', '13CO', 'C18O']
-    plot = analyse.custom_draw_map(xspacing=0.2, yspacing=0.2, tick_labels_size=7,
-                                   colorber_font_size=6, show=False)
+    h12 = 30
+    h13 = h12 + 290
+    h18 = h13 + 290
+    rii = 50
+    rrms = rii + 320 + 0
+    rsp = rrms + 280 + 0
+    fullh = 900
+    fullw = 1200
+    h = 290
+    w = 320
+    hs = 280
+    ws = 580
+    def merge(i, pol):
+        img = Image.new('RGB', (fullw, fullh), 'white')
+        img_ii12 = Image.open(qdir+fits12[i][:-5]+'.qlook.ii.png')
+        img_ii13 = Image.open(qdir+fits13[i][:-5]+'.qlook.ii.png')
+        img_ii18 = Image.open(qdir+fits18[i][:-5]+'.qlook.ii.png')
+        img_rms12 = Image.open(qdir+fits12[i][:-5]+'.qlook.rms.png')
+        img_rms13 = Image.open(qdir+fits13[i][:-5]+'.qlook.rms.png')
+        img_rms18 = Image.open(qdir+fits18[i][:-5]+'.qlook.rms.png')
+        img_sp12 = Image.open(qdir+fits12[i][:-5]+'.qlook.spectrum.png')
+        img_sp13 = Image.open(qdir+fits13[i][:-5]+'.qlook.spectrum.png')
+        img_sp18 = Image.open(qdir+fits18[i][:-5]+'.qlook.spectrum.png')
+        img_ii12.thumbnail((w,h), Image.ANTIALIAS)
+        img_ii13.thumbnail((w,h), Image.ANTIALIAS)
+        img_ii18.thumbnail((w,h), Image.ANTIALIAS)
+        img_rms12.thumbnail((w,h), Image.ANTIALIAS)
+        img_rms13.thumbnail((w,h), Image.ANTIALIAS)
+        img_rms18.thumbnail((w,h), Image.ANTIALIAS)
+        img_sp12.thumbnail((ws,hs), Image.ANTIALIAS)
+        img_sp13.thumbnail((ws,hs), Image.ANTIALIAS)
+        img_sp18.thumbnail((ws,hs), Image.ANTIALIAS)
+        img.paste(img_sp12, (rsp,h12+20))
+        img.paste(img_sp13, (rsp,h13+20))
+        img.paste(img_sp18, (rsp,h18+20))
+        img.paste(img_ii12, (rii,h12))
+        img.paste(img_ii13, (rii,h13))
+        img.paste(img_ii18, (rii,h18))
+        img.paste(img_rms12, (rrms,h12))
+        img.paste(img_rms13, (rrms,h13))
+        img.paste(img_rms18, (rrms,h18))
+        draw = ImageDraw.Draw(img)
+        draw.text((30, 5), name, font=ImageFont.load_default(), fill='black')
+        draw.text((1000, 880), time.strftime('generated in %Y/%m/%d %H:%M:%S'),
+                  font=ImageFont.load_default(), fill='black')
+        img.save(dirpath+name+'_%s.png'%(pol))
+        return
 
-    fig = pylab.figure(figsize=(12,10))
-    fig.suptitle(name)
-    for i, f in enumerate(fits_files[::2]):
-        _name = dirpath+f.split('.fits')[0]
-        cube = analyse.loadfits(_name+'.qlook.data.fits')
-        ii = analyse.loadfits(_name+'.qlook.ii.fits')
-        rms = analyse.loadfits(_name+'.qlook.rms.fits')
-        plot(ii, figure=fig, subplot=331+3*i, title='mom0: '+isotope[i])
-        plot(rms, figure=fig, subplot=332+3*i, title='rms: '+isotope[i])
-        analyse.draw_otf_spectrum(cube, figure=fig, subplot=333+3*i, title='spectra: '+isotope[i], show=False)
-        continue
-    fig.savefig(dirpath+name+'_H.png')
-    pylab.close(fig)
+    merge(0, 'H')
+    merge(1, 'V')
 
-    fig = pylab.figure(figsize=(12,10))
-    fig.suptitle(name)
-    for i, f in enumerate(fits_files[1::2]):
-        _name = dirpath+f.split('.fits')[0]
-        cube = analyse.loadfits(_name+'.qlook.data.fits')
-        ii = analyse.loadfits(_name+'.qlook.ii.fits')
-        rms = analyse.loadfits(_name+'.qlook.rms.fits')
-        plot(ii, figure=fig, subplot=331+3*i, title='mom0: '+isotope[i])
-        plot(rms, figure=fig, subplot=332+3*i, title='rms: '+isotope[i])
-        analyse.draw_otf_spectrum(cube, figure=fig, subplot=333+3*i, title='spectra: '+isotope[i], show=False)
-        continue
-    fig.savefig(dirpath+name+'_V.png')
-    pylab.close(fig)
     return
 
 
-def easy_analyse(fitspath, flag=None, plot=False, save=False):
+def easy_analyse(fitspath, output_dir, flag=None, plot=False, save=False):
     import analyse
     print('make_cube: %s'%(fitspath.split('/')[-1]))
     raw_data = analyse.loadfits(fitspath)
@@ -80,15 +114,18 @@ def easy_analyse(fitspath, flag=None, plot=False, save=False):
 
     if flag is None:
         fitted_data, flag = analyse.basefit(cw_data)
-        convolved_data = analyse.convolve(fitted_data, 2)
-        fitted_data, flag = analyse.basefit(convolved_data, 'auto', convolve=3)
+    else:
+        flag = analyse.loadfits(flag)
+        fitted_data = analyse.basefit_flag(cw_data, None, flag)
         pass
+    convolved_data = analyse.convolve(fitted_data, 2)
+    fitted_data = analyse.basefit_flag(convolved_data, None, flag)
 
     ii = analyse.make_2d_map(fitted_data, flag)
     rms = analyse.make_2d_map(fitted_data, flag, 'rms')
 
     if save:
-        savepath = fitspath.split('.fits')[0]
+        savepath = output_dir + fitspath.split('/')[-1].split('.fits')[0]
         analyse.savefits(fitted_data, savepath+'.qlook.data.fits', clobber=True)
         analyse.savefits(flag, savepath+'.qlook.flag.fits', clobber=True)
         analyse.savefits(ii, savepath+'.qlook.ii.fits', clobber=True)
@@ -96,9 +133,14 @@ def easy_analyse(fitspath, flag=None, plot=False, save=False):
         pass
 
     if plot:
-        savepath = fitspath.split('.fits')[0]
-        analyse.draw_map(ii, vmin=0).save(savepath+'.qlook.ii.png')
-        analyse.draw_map(rms, vmin=0).save(savepath+'.qlook.rms.png')
+        savepath = output_dir + fitspath.split('/')[-1].split('.fits')[0]
+        isotope = fitspath.split('_')[-2]
+        plot = analyse.custom_draw_map(figure=(8,8), xspacing=0.2, yspacing=0.2,
+                                       tick_labels_size=12, colorber_font_size=11, show=False)
+        plot(ii, title='mom0: '+isotope).save(savepath+'.qlook.ii.png')
+        plot(rms, title='rms: '+isotope).save(savepath+'.qlook.rms.png')
+        analyse.draw_otf_spectrum(fitted_data, figure=(12,5), title='spectra: '+isotope,
+                                  show=False).savefig(savepath+'.qlook.spectrum.png')
         pass
 
     raw_data.data = None
@@ -107,11 +149,12 @@ def easy_analyse(fitspath, flag=None, plot=False, save=False):
 
 if __name__ =='__main__':
     import sys
-    if len(sys.argv)>=2:
+    if len(sys.argv)>=3:
         path = sys.argv[1]
-        if len(sys.argv)>=3:
-            flag_path = sys.argv[2]
+        out = sys.argv[2]
+        if len(sys.argv)>=4:
+            flag_path = sys.argv[3]
         else: flag_path = None
 
-        easy_analyse(path, flag_path, save=True)
+        easy_analyse(path, out, flag_path, plot=True, save=True)
         pass

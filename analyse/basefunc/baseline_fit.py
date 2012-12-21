@@ -77,8 +77,12 @@ def basefit_simple_line(num, spect, v, fitting_part, degree):
 
     return fitted_spect, emission_flag
 
+def basefit_flag(hdu, v, flag):
+    import pyfits
+    fitted_data = _basefit_flag(hdu.data, flag.data)
+    return pyfits.PrimaryHDU(fitted_data, hdu.header)
 
-def basefit_flag(cube, flag, degree=1):
+def _basefit_flag(cube, flag, degree=1):
     import numpy
     nz, ny, nx = cube.shape
     spectra = cube.T.reshape(nx*ny, nz)
@@ -115,7 +119,7 @@ def basefit_auto(hdu, v, fitting_range=[-150, 150], degree=1,
                    for i,spec in enumerate(spectra)]
     fit_results = numpy.array(fit_results)
     emission_flag = numpy.array(fit_results[:,1].reshape(nx, ny, nz).T, dtype=numpy.int16)
-    fitted = basefit_flag(cube, emission_flag)
+    fitted = _basefit_flag(cube, emission_flag)
     return fitted, emission_flag
 
 def basefit_auto_line(i, spect, v, fitting_range, degree,

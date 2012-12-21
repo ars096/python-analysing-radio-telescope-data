@@ -15,13 +15,17 @@ def draw_map(data, figure=None, subplot=111,
              tick_labels_xformat='ddd.d', tick_labels_yformat='dd.d',
              tick_labels_size=9, colorber_font_size=8,
              font_family=None,
-             show=True):
+             save=None, show=True):
     import analyse
     import analyse.plotter
     import aplpy
+    import matplotlib.figure
     import pylab
-    if figure is None:
-        figure = pylab.figure()
+    if not isinstance(figure, matplotlib.figure.Figure):
+        if figure is None:
+            figure = pylab.figure()
+        else:
+            figure = pylab.figure(figsize=figure)
     else:
         show = False
 
@@ -66,6 +70,9 @@ def draw_map(data, figure=None, subplot=111,
     fits_figure.tick_labels.set_font(family=font_family, size=tick_labels_size)
     fits_figure.colorbar.set_font(family=font_family, size=colorber_font_size)
 
+    if save is not None:
+        fits_figure.save(save)
+
     if show:
         pylab.show()
 
@@ -82,16 +89,13 @@ def draw_otf_spectrum(cube, figure=None, subplot=111, title='', grid=True,
                       show=True, *args, **kwargs):
     import analyse
     import analyse.plotter
+    import matplotlib.figure
     import pylab
-    import matplotlib
-
-    def_font_size = matplotlib.rcParams['font.size']
-    def_font_family = matplotlib.rcParams['font.family']
-    matplotlib.rcParams['font.size'] = tick_labels_size
-    if font_family is not None: matplotlib.rcParams['font.family'] = font_family
-
-    if figure is None:
-        figure = pylab.figure()
+    if not isinstance(figure, matplotlib.figure.Figure):
+        if figure is None:
+            figure = pylab.figure()
+        else:
+            figure = pylab.figure(figsize=figure)
     else:
         show = False
 
@@ -119,8 +123,6 @@ def draw_otf_spectrum(cube, figure=None, subplot=111, title='', grid=True,
     if show:
         pylab.show()
 
-    matplotlib.rcParams['font.size'] = def_font_size
-    matplotlib.rcParams['font.family'] = def_font_family
     return figure
 
 
