@@ -19,13 +19,12 @@ def qlook_otf(dirpath, filesave=False):
         print(files)
         return
 
-    fits_files = []
+    fits12 = []
+    fits13 = []
+    fits18 = []
     # file check
     for f in files:
-        if f.split('_')[0]!='otf':
-            continue
-        if f.split('.')[-1]!='fits':
-            continue
+        if not f.endwith('fits'): continue
         if f.split('.')[-3]=='qlook':
             continue
         fits_files.append(f)
@@ -114,5 +113,5 @@ if __name__ =='__main__':
             flag_path = sys.argv[2]
         else: flag_path = None
 
-        easy_analyse(path, save=True)
+        easy_analyse(path, flag_path, save=True)
         pass
