@@ -10,7 +10,6 @@ def qlook_ss(dirpath, filesave=False):
     import os
     import pylab
     import analyse
-    import analyse.plotter.plot_ps
 
     if dirpath[-1]!='/': dirpath += '/'
     files = sorted(os.listdir(dirpath))
@@ -40,7 +39,7 @@ def qlook_ss(dirpath, filesave=False):
 
     isotope = ['12CO', '13CO', 'C18O']
     fig = pylab.figure(figsize=(20,12))
-    fig.suptitle(name)
+    fig.suptitle(name+'_H')
     for i, f in enumerate(fits_files[::2]):
         _name = dirpath+f.split('.fits')[0]
         raw = analyse.loadfits(_name+'.fits')
@@ -48,14 +47,14 @@ def qlook_ss(dirpath, filesave=False):
         cube, flag = analyse.basefit(d[0])
         #cube = analyse.loadfits(_name+'.qlook.data.fits')
         #flag = analyse.loadfits(_name+'.qlook.flag.fits')
-        analyse.draw_ps_raw(raw, figure=fig, subplot=323+3*i, title='spectra: '+isotope[i], show=False)
-        analyse.draw_ps_spectrum(raw, figure=fig, subplot=323+3*i, title='spectra: '+isotope[i], show=False)
+        analyse.draw_ps_raw(raw, figure=fig, subplot=231+i, title='raw: '+isotope[i], show=False)
+        analyse.draw_ss_spectrum(cube, flag, figure=fig, subplot=234+i, title='spectrum: '+isotope[i], show=False)
         continue
     #fig.savefig(dirpath+name+'_H.png')
     pylab.show()
 
     fig = pylab.figure(figsize=(20,12))
-    fig.suptitle(name)
+    fig.suptitle(name+'_V')
     for i, f in enumerate(fits_files[1::2]):
         _name = dirpath+f.split('.fits')[0]
         raw = analyse.loadfits(_name+'.fits')
@@ -63,8 +62,8 @@ def qlook_ss(dirpath, filesave=False):
         cube, flag = analyse.basefit(d[0])
         #cube = analyse.loadfits(_name+'.qlook.data.fits')
         #flag = analyse.loadfits(_name+'.qlook.flag.fits')
-        analyse.draw_ps_raw(raw, figure=fig, subplot=231+i, title='spectra: '+isotope[i], show=False)
-        analyse.draw_ss_spectrum(raw, figure=fig, subplot=234+i, title='spectra: '+isotope[i], show=False)
+        analyse.draw_ps_raw(raw, figure=fig, subplot=231+i, title='raw: '+isotope[i], show=False)
+        analyse.draw_ss_spectrum(cube, flag, figure=fig, subplot=234+i, title='spectrum: '+isotope[i], show=False)
         continue
     #fig.savefig(dirpath+name+'_V.png')
     pylab.show()

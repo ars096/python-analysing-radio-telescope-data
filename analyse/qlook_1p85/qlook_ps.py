@@ -39,8 +39,8 @@ def qlook_ps(dirpath, filesave=False):
         continue
 
     isotope = ['12CO', '13CO', 'C18O']
-    fig = pylab.figure()
-    fig.suptitle(name)
+    fig = pylab.figure(figsize=(15,9))
+    fig.suptitle(name+'_H')
     for i, f in enumerate(fits_files[::2]):
         _name = dirpath+f.split('.fits')[0]
         raw = analyse.loadfits(_name+'.fits')
@@ -48,14 +48,14 @@ def qlook_ps(dirpath, filesave=False):
         cube, flag = analyse.basefit(d[0])
         #cube = analyse.loadfits(_name+'.qlook.data.fits')
         #flag = analyse.loadfits(_name+'.qlook.flag.fits')
-        analyse.draw_ps_raw(raw, figure=fig, subplot=323+3*i, title='spectra: '+isotope[i], show=False)
-        analyse.draw_ps_spectrum(raw, figure=fig, subplot=323+3*i, title='spectra: '+isotope[i], show=False)
+        analyse.draw_ps_raw(raw, figure=fig, subplot=231+i, title='raw: '+isotope[i], show=False)
+        analyse.draw_ps_spectrum(cube, figure=fig, subplot=234+i, title='spectra: '+isotope[i], show=False)
         continue
     #fig.savefig(dirpath+name+'_H.png')
     pylab.show()
 
-    fig = pylab.figure()
-    fig.suptitle(name)
+    fig = pylab.figure(figsize=(15,9))
+    fig.suptitle(name+'_V')
     for i, f in enumerate(fits_files[1::2]):
         _name = dirpath+f.split('.fits')[0]
         raw = analyse.loadfits(_name+'.fits')
@@ -63,8 +63,8 @@ def qlook_ps(dirpath, filesave=False):
         cube, flag = analyse.basefit(d[0])
         #cube = analyse.loadfits(_name+'.qlook.data.fits')
         #flag = analyse.loadfits(_name+'.qlook.flag.fits')
-        analyse.draw_ps_raw(raw, figure=fig, subplot=231+i, title='spectra: '+isotope[i], show=False)
-        analyse.draw_ss_spectrum(raw, figure=fig, subplot=234+i, title='spectra: '+isotope[i], show=False)
+        analyse.draw_ps_raw(raw, figure=fig, subplot=231+i, title='raw: '+isotope[i], show=False)
+        analyse.draw_ps_spectrum(cube, figure=fig, subplot=234+i, title='spectra: '+isotope[i], show=False)
         continue
     #fig.savefig(dirpath+name+'_V.png')
     pylab.show()
