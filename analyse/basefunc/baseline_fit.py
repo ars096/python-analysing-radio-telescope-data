@@ -103,7 +103,7 @@ def basefit_flag_line(spect, flag, degree):
 
 
 def basefit_auto(hdu, v, fitting_range=[-150, 150], degree=1,
-                 smooth=21, mincount=41, nsig=1.3, convolve=5):
+                 smooth=11, mincount=21, nsig=1.3, convolve=5):
     import numpy
     import analyse
     cube = hdu.data
@@ -120,10 +120,18 @@ def basefit_auto(hdu, v, fitting_range=[-150, 150], degree=1,
     fit_results = numpy.array(fit_results)
     emission_flag = numpy.array(fit_results[:,1].reshape(nx, ny, nz).T, dtype=numpy.int16)
     fitted = _basefit_flag(cube, emission_flag)
+
+    """
+    import pyfits
+    cfitted = _basefit_flag(ccube.data, emission_flag)
+    cc = pyfits.PrimaryHDU(cfitted, hdu.header)
+    flag = pyfits.PrimaryHDU(emission_flag, hdu.header)
+    analyse.basefit_interactive(cc, flag)
+    """
     return fitted, emission_flag
 
 def basefit_auto_line(i, spect, v, fitting_range, degree,
-                      smooth, mincount, nsig):
+                      smooth, mincount, nsig, maxittr=30):
     import numpy
     import sys
     if i%10==0:
@@ -138,13 +146,15 @@ def basefit_auto_line(i, spect, v, fitting_range, degree,
         larger_ind =  numpy.where(v>fitting_range[1]*1000.)
     else: larger_ind = [0,]
 
+    """
     fit_d = spect.copy()
     fit_d[smaller_ind] = 0
     fit_d[larger_ind] = 0
     fit_d = numpy.convolve(fit_d, numpy.ones(smooth)/float(smooth), 'same')
     fit_d[smaller_ind] = numpy.nan
     fit_d[larger_ind] = numpy.nan
-    fit_d = cut_small_sample(fit_d, nsig=nsig, mincount=mincount)
+    ###fit_d = cut_small_sample(fit_d, nsig=nsig, mincount=mincount)
+
 
     fit_indices = numpy.where((fit_d==0)&(fit_d==fit_d))
     fitted_curve = numpy.polyfit(v[fit_indices], spect[fit_indices], deg=degree)
@@ -157,6 +167,34 @@ def basefit_auto_line(i, spect, v, fitting_range, degree,
     emission_flag[smaller_ind] = -1
     emission_flag[larger_ind] = -1
     return fitted_spect, emission_flag
+    """
+    cspect = spect.copy()
+    cspect[smaller_ind] = 0
+    cspect[larger_ind] = 0
+    cspect = numpy.convolve(cspect, numpy.ones(smooth)/float(smooth), 'same')
+    fit_indices = numpy.ones(len(spect))
+    fit_indices[smaller_ind] = 0
+    fit_indices[larger_ind] = 0
+    fit_indices = numpy.array(fit_indices, dtype=bool)
+    recent_rms = 100
+    for i in range(maxittr):
+        best_fit = numpy.polyfit(v[fit_indices], cspect[fit_indices], deg=degree)
+        cfitted = cspect - numpy.polyval(best_fit, v)
+        cfitted[smaller_ind] = numpy.nan
+        cfitted[larger_ind] = numpy.nan
+        cfitted_rms = rms(cfitted)
+        if recent_rms < cfitted_rms * 1.1: break
+        recent_rms = cfitted_rms
+        fit_indices[numpy.where(cfitted>cfitted_rms*nsig)] = False
+        continue
+
+    fit_indices = cut_small(fit_indices, mincount=mincount)
+    fitted_spectrum = spect - numpy.polyval(best_fit, v)
+    emission_flag = numpy.ones(len(spect))
+    emission_flag[fit_indices] = 0
+    emission_flag[smaller_ind] = -1
+    emission_flag[larger_ind] = -1
+    return fitted_spectrum, emission_flag
 
 def nearest_index(target, indices):
     return numpy.array((indices - target)**2.).argmin()
@@ -205,6 +243,20 @@ def cut_small_sample(d, nsig=1, mincount=5, threshold=None):
         checking.append(i)
         continue
     return dd
+
+def cut_small(d, mincount=5):
+    checking = []
+    for i,_d in enumerate(d):
+        if _d:
+            if len(checking)==0: continue
+            if len(checking)<=mincount:
+                d[checking] = True
+                pass
+            checking = []
+            continue
+        checking.append(i)
+        continue
+    return d
 
 
 def basefit_interactive(data, flag):

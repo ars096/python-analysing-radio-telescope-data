@@ -14,6 +14,7 @@ def qlook_otf(dirpath, filesave=False, reduct=True):
     import ImageDraw
     import ImageFont
     import analyse
+    import functools
 
     if dirpath[-1]!='/': dirpath += '/'
     files = sorted(os.listdir(dirpath))
@@ -103,6 +104,34 @@ def qlook_otf(dirpath, filesave=False, reduct=True):
     merge(0, 'H')
     merge(1, 'V')
 
+    def plot(i, pol):
+        ii12 = analyse.loadfits(qdir+fits12[i][:-5]+'.qlook.ii.fits')
+        ii13 = analyse.loadfits(qdir+fits13[i][:-5]+'.qlook.ii.fits')
+        ii18 = analyse.loadfits(qdir+fits18[i][:-5]+'.qlook.ii.fits')
+        rms12 = analyse.loadfits(qdir+fits12[i][:-5]+'.qlook.rms.fits')
+        rms13 = analyse.loadfits(qdir+fits13[i][:-5]+'.qlook.rms.fits')
+        rms18 = analyse.loadfits(qdir+fits18[i][:-5]+'.qlook.rms.fits')
+        sp12 = analyse.loadfits(qdir+fits12[i][:-5]+'.qlook.data.fits')
+        sp13 = analyse.loadfits(qdir+fits13[i][:-5]+'.qlook.data.fits')
+        sp18 = analyse.loadfits(qdir+fits18[i][:-5]+'.qlook.data.fits')
+        fig = pylab.figure(figsize=(25,25))
+        fig.suptitle(name, fontsize=22)
+        plot = analyse.custom_draw_map(figure=fig, xspacing=0.2, yspacing=0.2,
+                                       tick_labels_size=12, colorber_font_size=11, show=False)
+        splt = functools.partial(analyse.draw_otf_spectrum, figure=fig, tick_labels_size=12, show=False)
+        plot(ii12, subplot=331, title='12CO(2-1): mom0')
+        plot(ii13, subplot=331+3, title='13CO(2-1): mom0')
+        plot(ii18, subplot=331+6, title='C18O(2-1): mom0')
+        plot(rms12, subplot=332, title='12CO(2-1): rms')
+        plot(rms13, subplot=332+3, title='13CO(2-1): rms')
+        plot(rms18, subplot=332+6, title='C18O(2-1): rms')
+        splt(sp12, subplot=333, title='12CO(2-1): spectrum')
+        splt(sp13, subplot=333+3, title='13CO(2-1): spectrum')
+        splt(sp18, subplot=333+6, title='C18O(2-1): spectrum')
+        fig.savefig(dirpath+name+'_%s_test.png'%(pol), dpi=70)
+
+    plot(0, 'H')
+    plot(1, 'V')
     return
 
 

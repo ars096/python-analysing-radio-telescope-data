@@ -87,10 +87,13 @@ def custom_draw_map(**kwargs):
 def draw_otf_spectrum(cube, figure=None, subplot=111, title='', grid=True,
                       font_family=None, tick_labels_size=9, xlim=None, ylim=None,
                       show=True, *args, **kwargs):
+    import time
     import analyse
     import analyse.plotter
     import matplotlib.figure
     import pylab
+    t0 = time.time()
+    print('[%f] -- %f'%(time.time(), time.time()-t0))
     if not isinstance(figure, matplotlib.figure.Figure):
         if figure is None:
             figure = pylab.figure()
@@ -110,7 +113,7 @@ def draw_otf_spectrum(cube, figure=None, subplot=111, title='', grid=True,
     v = analyse.generate_axis(cube, axis=3) / 1000.
 
     ax = figure.add_axes(subplot)
-    [ax.plot(v, s) for s in spectra]
+    [ax.plot(v[::10], s[::10], '+') for s in spectra]
     ax.grid(grid)
     ax.set_title(title, size=tick_labels_size+1)
     if xlim is not None: ax.set_xlim(*xlim)
@@ -123,12 +126,17 @@ def draw_otf_spectrum(cube, figure=None, subplot=111, title='', grid=True,
     if show:
         pylab.show()
 
+    print('[%f] -- %f'%(time.time(), time.time()-t0))
     return figure
 
 
-def draw_otf(ii=None, rms=None, cube=None, suptitle='', show=True,
+def draw_otf(cube, flag=None, ii=None, rms=None, suptitle='', show=True,
              *args, **kwargs):
     import pylab
+    import analyse
+
+    if ii is None: ii = analyse.make_2d_map(cube, flag)
+    if rms is None: rms = analyse.make_2d_map(cube, flag, 'rms')
 
     fig = pylab.figure(figsize=(10,8))
     fig.suptitle(suptitle)
