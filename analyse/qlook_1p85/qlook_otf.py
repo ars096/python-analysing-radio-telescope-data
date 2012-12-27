@@ -10,9 +10,6 @@ def qlook_otf(dirpath, filesave=False, reduct=True):
     import os
     import time
     import pylab
-    import Image
-    import ImageDraw
-    import ImageFont
     import analyse
     import functools
 
@@ -52,57 +49,6 @@ def qlook_otf(dirpath, filesave=False, reduct=True):
         os.system('python %s %s %s'%(__file__, dirpath+fits18[0], qdir))
         os.system('python %s %s %s %s'%(__file__, dirpath+fits18[1], qdir, qdir+fits18[0][:-5]+flag_ex))
         pass
-
-    h12 = 30
-    h13 = h12 + 290
-    h18 = h13 + 290
-    rii = 50
-    rrms = rii + 320 + 0
-    rsp = rrms + 280 + 0
-    fullh = 900
-    fullw = 1200
-    h = 290
-    w = 320
-    hs = 280
-    ws = 580
-    def merge(i, pol):
-        img = Image.new('RGB', (fullw, fullh), 'white')
-        img_ii12 = Image.open(qdir+fits12[i][:-5]+'.qlook.ii.png')
-        img_ii13 = Image.open(qdir+fits13[i][:-5]+'.qlook.ii.png')
-        img_ii18 = Image.open(qdir+fits18[i][:-5]+'.qlook.ii.png')
-        img_rms12 = Image.open(qdir+fits12[i][:-5]+'.qlook.rms.png')
-        img_rms13 = Image.open(qdir+fits13[i][:-5]+'.qlook.rms.png')
-        img_rms18 = Image.open(qdir+fits18[i][:-5]+'.qlook.rms.png')
-        img_sp12 = Image.open(qdir+fits12[i][:-5]+'.qlook.spectrum.png')
-        img_sp13 = Image.open(qdir+fits13[i][:-5]+'.qlook.spectrum.png')
-        img_sp18 = Image.open(qdir+fits18[i][:-5]+'.qlook.spectrum.png')
-        img_ii12.thumbnail((w,h), Image.ANTIALIAS)
-        img_ii13.thumbnail((w,h), Image.ANTIALIAS)
-        img_ii18.thumbnail((w,h), Image.ANTIALIAS)
-        img_rms12.thumbnail((w,h), Image.ANTIALIAS)
-        img_rms13.thumbnail((w,h), Image.ANTIALIAS)
-        img_rms18.thumbnail((w,h), Image.ANTIALIAS)
-        img_sp12.thumbnail((ws,hs), Image.ANTIALIAS)
-        img_sp13.thumbnail((ws,hs), Image.ANTIALIAS)
-        img_sp18.thumbnail((ws,hs), Image.ANTIALIAS)
-        img.paste(img_sp12, (rsp,h12+20))
-        img.paste(img_sp13, (rsp,h13+20))
-        img.paste(img_sp18, (rsp,h18+20))
-        img.paste(img_ii12, (rii,h12))
-        img.paste(img_ii13, (rii,h13))
-        img.paste(img_ii18, (rii,h18))
-        img.paste(img_rms12, (rrms,h12))
-        img.paste(img_rms13, (rrms,h13))
-        img.paste(img_rms18, (rrms,h18))
-        draw = ImageDraw.Draw(img)
-        draw.text((30, 5), name, font=ImageFont.load_default(), fill='black')
-        draw.text((1000, 880), time.strftime('generated in %Y/%m/%d %H:%M:%S'),
-                  font=ImageFont.load_default(), fill='black')
-        img.save(dirpath+name+'_%s.png'%(pol))
-        return
-
-    merge(0, 'H')
-    merge(1, 'V')
 
     def plot(i, pol):
         ii12 = analyse.loadfits(qdir+fits12[i][:-5]+'.qlook.ii.fits')
