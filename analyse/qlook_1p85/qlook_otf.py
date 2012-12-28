@@ -64,7 +64,8 @@ def qlook_otf(dirpath, filesave=False, reduct=True):
         fig.suptitle(name, fontsize=22)
         plot = analyse.custom_draw_map(figure=fig, xspacing=0.2, yspacing=0.2,
                                        tick_labels_size=12, colorber_font_size=11, show=False)
-        splt = functools.partial(analyse.draw_otf_spectrum, figure=fig, tick_labels_size=12, show=False)
+        splt = functools.partial(analyse.draw_otf_spectrum, figure=fig, tick_labels_size=12,
+                                 xlim=(-150,150), show=False)
         plot(ii12, subplot=331, title='12CO(2-1): mom0')
         plot(ii13, subplot=331+3, title='13CO(2-1): mom0')
         plot(ii18, subplot=331+6, title='C18O(2-1): mom0')
