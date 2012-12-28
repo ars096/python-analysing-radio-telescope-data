@@ -59,7 +59,7 @@ def make_integ_map(cube, flag=None, axis='v', detection_mode=''):
         dcube[numpy.where(flag.data!=1)] = 0
         dcube[numpy.isnan(dcube)] = 0
         dcube[numpy.isinf(dcube)] = 0
-        integ = numpy.sum(dcube, axis=0)*(cube.header['DELT3']/1000.)
+        integ = numpy.sum(dcube, axis=0)*(cube.header['CDELT3']/1000.)
 
         header = cube.header.copy()
         header.pop('NAXIS3')
