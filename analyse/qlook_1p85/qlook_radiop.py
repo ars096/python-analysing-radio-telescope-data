@@ -50,12 +50,12 @@ def qlook_radiop(dirpath):
     ax1,ax2,fig = analyse.plotter.plot_radiop.draw_radiop(d[5][0], iso = 'C18O_V', color='y',fig=fig,ax1=ax1, ax2=ax2,show=False)
     ax3 = None
     ax4 = None
-    ax3,ax4,fig = analyse.draw_radiop(d[0][1], iso = '12CO_H', color='b',fig=fig, ax1=ax3, ax2=ax4, ax1_plot=144, ax2_plot=143,show=False, vertical=True)
-    ax3,ax4,fig = analyse.draw_radiop(d[2][1], iso = '13CO_H', color='g',fig=fig,ax1=ax3, ax2=ax4,show=False, vertical=True)
-    ax3,ax4,fig = analyse.draw_radiop(d[4][1], iso = 'C18O_H', color='c',fig=fig,ax1=ax3, ax2=ax4,show=False, vertical=True)
-    ax3,ax4,fig = analyse.draw_radiop(d[1][1], iso = '12CO_V', color='r',fig=fig,ax1=ax3, ax2=ax4,show=False, vertical=True)
-    ax3,ax4,fig = analyse.draw_radiop(d[3][1], iso = '13CO_V', color='m',fig=fig,ax1=ax3, ax2=ax4,show=False, vertical=True)
-    ax3,ax4,fig = analyse.draw_radiop(d[5][1], iso = 'C18O_V', color='y',fig=fig,ax1=ax3, ax2=ax4,show=False, vertical=True)
+    ax3,ax4,fig = analyse.plotter.plot_radiop.draw_radiop(d[0][1], iso = '12CO_H', color='b',fig=fig, ax1=ax3, ax2=ax4, ax1_plot=144, ax2_plot=143,show=False, vertical=True)
+    ax3,ax4,fig = analyse.plotter.plot_radiop.draw_radiop(d[2][1], iso = '13CO_H', color='g',fig=fig,ax1=ax3, ax2=ax4,show=False, vertical=True)
+    ax3,ax4,fig = analyse.plotter.plot_radiop.draw_radiop(d[4][1], iso = 'C18O_H', color='c',fig=fig,ax1=ax3, ax2=ax4,show=False, vertical=True)
+    ax3,ax4,fig = analyse.plotter.plot_radiop.draw_radiop(d[1][1], iso = '12CO_V', color='r',fig=fig,ax1=ax3, ax2=ax4,show=False, vertical=True)
+    ax3,ax4,fig = analyse.plotter.plot_radiop.draw_radiop(d[3][1], iso = '13CO_V', color='m',fig=fig,ax1=ax3, ax2=ax4,show=False, vertical=True)
+    ax3,ax4,fig = analyse.plotter.plot_radiop.draw_radiop(d[5][1], iso = 'C18O_V', color='y',fig=fig,ax1=ax3, ax2=ax4,show=False, vertical=True)
     ax1.legend()
     ax2.legend()
     ax3.legend()
