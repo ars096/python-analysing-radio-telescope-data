@@ -11,6 +11,8 @@ def qlook_radiop(dirpath):
     import os
     import pylab
     import analyse
+    import analyse.basefunc.analyse_radiop
+    import analyse.plotter.plot_radiop
     import pylab
     
     if dirpath[-1]!='/': dirpath += '/'
@@ -28,7 +30,7 @@ def qlook_radiop(dirpath):
     ana_data = []
     for f in fits_files:
         hdu = analyse.loadfits(dirpath+f)
-        ana_data.append(analyse.analyse_radiop(hdu))
+        ana_data.append(analyse.basefunc.analyse_radiop.analyse_radiop(hdu))
     
     d = ana_data
     
@@ -40,12 +42,12 @@ def qlook_radiop(dirpath):
     pylab.rcParams['figure.subplot.hspace'] = 0.5
     pylab.rcParams['figure.subplot.wspace'] = 0.5
     pylab.rcParams['font.size'] = 6
-    ax1,ax2,fig = analyse.draw_radiop(d[0][0], iso = '12CO_H', color='b',fig=fig,ax1_plot=221, ax2_plot=223,show=False)
-    ax1,ax2,fig = analyse.draw_radiop(d[2][0], iso = '13CO_H', color='g',fig=fig,ax1=ax1, ax2=ax2,show=False)
-    ax1,ax2,fig = analyse.draw_radiop(d[4][0], iso = 'C18O_H', color='c',fig=fig,ax1=ax1, ax2=ax2,show=False)
-    ax1,ax2,fig = analyse.draw_radiop(d[1][0], iso = '12CO_V', color='r',fig=fig,ax1=ax1, ax2=ax2,show=False)
-    ax1,ax2,fig = analyse.draw_radiop(d[3][0], iso = '13CO_V', color='m',fig=fig,ax1=ax1, ax2=ax2,show=False)
-    ax1,ax2,fig = analyse.draw_radiop(d[5][0], iso = 'C18O_V', color='y',fig=fig,ax1=ax1, ax2=ax2,show=False)
+    ax1,ax2,fig = analyse.plotter.plot_radiop.draw_radiop(d[0][0], iso = '12CO_H', color='b',fig=fig,ax1_plot=221, ax2_plot=223,show=False)
+    ax1,ax2,fig = analyse.plotter.plot_radiop.draw_radiop(d[2][0], iso = '13CO_H', color='g',fig=fig,ax1=ax1, ax2=ax2,show=False)
+    ax1,ax2,fig = analyse.plotter.plot_radiop.draw_radiop(d[4][0], iso = 'C18O_H', color='c',fig=fig,ax1=ax1, ax2=ax2,show=False)
+    ax1,ax2,fig = analyse.plotter.plot_radiop.draw_radiop(d[1][0], iso = '12CO_V', color='r',fig=fig,ax1=ax1, ax2=ax2,show=False)
+    ax1,ax2,fig = analyse.plotter.plot_radiop.draw_radiop(d[3][0], iso = '13CO_V', color='m',fig=fig,ax1=ax1, ax2=ax2,show=False)
+    ax1,ax2,fig = analyse.plotter.plot_radiop.draw_radiop(d[5][0], iso = 'C18O_V', color='y',fig=fig,ax1=ax1, ax2=ax2,show=False)
     ax3 = None
     ax4 = None
     ax3,ax4,fig = analyse.draw_radiop(d[0][1], iso = '12CO_H', color='b',fig=fig, ax1=ax3, ax2=ax4, ax1_plot=144, ax2_plot=143,show=False, vertical=True)
