@@ -5,7 +5,7 @@
 Documents
 """
 
-def draw_skydip(data, ax=None, color='b', shape='o', iso = '', show=True):
+def draw_skydip(data, fig, ax=None, color='b', shape='o', iso = '', show=True):
     import pylab
     tau = data[0]
     tsys = data[1]
@@ -16,8 +16,9 @@ def draw_skydip(data, ax=None, color='b', shape='o', iso = '', show=True):
     #plot
     if ax is None:
         print(ax)
-        fig = pylab.figure()
-        ax = fig.add_subplot(111)
+        #fig = pylab.figure(figsize=(10,5))
+        fig = fig
+        ax = fig.add_subplot(211)
         ax.grid()
         ax.set_ylabel('log((Phot-Psky)/Phot)')
         ax.set_xlabel('secZ')
