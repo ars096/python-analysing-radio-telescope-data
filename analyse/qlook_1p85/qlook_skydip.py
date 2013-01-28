@@ -9,6 +9,7 @@ def qlook_skydip(dirpath):
     import pylab
     import analyse
     import analyse.basefunc.analyse_skydip
+    import analyse.plotter.plot_skydip
     import pylab
     
     if dirpath[-1]!='/': dirpath += '/'
@@ -34,12 +35,12 @@ def qlook_skydip(dirpath):
     pylab.rcParams['legend.fontsize']=5.5
     pylab.rcParams['figure.subplot.hspace']=0.5
     fig = pylab.figure(figsize=(8,5))
-    ax = analyse.draw_skydip(ana_data[0],fig=fig,show=False,iso='12CO H',color='b')
-    ax = analyse.draw_skydip(ana_data[2],fig=fig,ax=ax,show=False,iso='13CO H',color='g')
-    ax = analyse.draw_skydip(ana_data[4],fig=fig,ax=ax,show=False,iso='C18O H',color='c')
-    ax = analyse.draw_skydip(ana_data[1],fig=fig,ax=ax,show=False,iso='12CO V',color='r')
-    ax = analyse.draw_skydip(ana_data[3],fig=fig,ax=ax,show=False,iso='13CO V',color='m')
-    ax = analyse.draw_skydip(ana_data[5],fig=fig,ax=ax,show=False,iso='C18O V',color='y')
+    ax = analyse.plotter.plot_skydip.draw_skydip(ana_data[0],fig=fig,show=False,iso='12CO H',color='b')
+    ax = analyse.plotter.plot_skydip.draw_skydip(ana_data[2],fig=fig,ax=ax,show=False,iso='13CO H',color='g')
+    ax = analyse.plotter.plot_skydip.draw_skydip(ana_data[4],fig=fig,ax=ax,show=False,iso='C18O H',color='c')
+    ax = analyse.plotter.plot_skydip.draw_skydip(ana_data[1],fig=fig,ax=ax,show=False,iso='12CO V',color='r')
+    ax = analyse.plotter.plot_skydip.draw_skydip(ana_data[3],fig=fig,ax=ax,show=False,iso='13CO V',color='m')
+    ax = analyse.plotter.plot_skydip.draw_skydip(ana_data[5],fig=fig,ax=ax,show=False,iso='C18O V',color='y')
     ax.set_title('skydip results ' + name)
     ax.legend()
 
