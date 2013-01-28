@@ -8,6 +8,7 @@ def qlook_skydip(dirpath):
     import os
     import pylab
     import analyse
+    import analyse.basefunc.analyse_skydip
     import pylab
     
     if dirpath[-1]!='/': dirpath += '/'
@@ -26,7 +27,7 @@ def qlook_skydip(dirpath):
     ana_data = []
     for f in fits_files:
         hdu = analyse.loadfits(dirpath+f)
-        ana_data.append(analyse.analyse_skydip(hdu))
+        ana_data.append(analyse.basefunc.analyse_skydip.analyse_skydip(hdu))
     # plot 
     
     name = f.split('_')[2]
