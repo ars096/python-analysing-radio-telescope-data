@@ -52,6 +52,7 @@ def qlook_ss(dirpath, filesave=False, savepath='./'):
         analyse.draw_ss_spectrum(cube, flag, figure=fig, subplot=234+i, title='spectrum: '+isotope[i], show=False)
         continue
     fig.savefig(savepath+'qlook_standardsource_'+timestamp+'_H.png')
+    pylab.close(fig)
     #pylab.show()
 
     fig = pylab.figure(figsize=(20,12))
@@ -67,6 +68,7 @@ def qlook_ss(dirpath, filesave=False, savepath='./'):
         analyse.draw_ss_spectrum(cube, flag, figure=fig, subplot=234+i, title='spectrum: '+isotope[i], show=False)
         continue
     fig.savefig(savepath+'qlook_standardsource_'+timestamp+'_V.png')
+    pylab.close(fig)
     #pylab.show()
     return
 
