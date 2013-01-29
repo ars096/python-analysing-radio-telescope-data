@@ -32,6 +32,7 @@ def qlook_ss(dirpath, filesave=False, savepath='./'):
         continue
 
     name = files[4].split('_12CO_H.fits')[0]
+    timestamp = dirpath.split('/')[-2]
 
     for f in fits_files:
         os.system('python %s %s'%(__file__, dirpath+f))
@@ -50,7 +51,7 @@ def qlook_ss(dirpath, filesave=False, savepath='./'):
         analyse.draw_ps_raw(raw, figure=fig, subplot=231+i, title='raw: '+isotope[i], show=False)
         analyse.draw_ss_spectrum(cube, flag, figure=fig, subplot=234+i, title='spectrum: '+isotope[i], show=False)
         continue
-    fig.savefig(savepath+name+'_H.png')
+    fig.savefig(savepath+'qlook_standardsource_'+timestamp+'_H.png')
     #pylab.show()
 
     fig = pylab.figure(figsize=(20,12))
@@ -65,7 +66,7 @@ def qlook_ss(dirpath, filesave=False, savepath='./'):
         analyse.draw_ps_raw(raw, figure=fig, subplot=231+i, title='raw: '+isotope[i], show=False)
         analyse.draw_ss_spectrum(cube, flag, figure=fig, subplot=234+i, title='spectrum: '+isotope[i], show=False)
         continue
-    fig.savefig(savepath+name+'_V.png')
+    fig.savefig(savepath+'qlook_standardsource_'+timestamp+'_V.png')
     #pylab.show()
     return
 

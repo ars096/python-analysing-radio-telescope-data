@@ -67,7 +67,7 @@ def qlook_ps(dirpath, filesave=False):
         analyse.draw_ps_spectrum(cube, figure=fig, subplot=234+i, title='spectra: '+isotope[i], show=False)
         continue
     #fig.savefig(dirpath+name+'_V.png')
-    pylab.show()
+    #pylab.show()
     return
 
 def easy_analyse(fitspath, save=False):
