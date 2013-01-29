@@ -77,7 +77,7 @@ def qlook_otf(dirpath, filesave=False, reduct=True, savepath='./'):
         splt(sp13, subplot=333+3, title='13CO(2-1): spectrum')
         splt(sp18, subplot=333+6, title='C18O(2-1): spectrum')
         fig.savefig(dirpath+name+'_%s_test.png'%(pol), dpi=70)
-        fig.savefig(savepath+'qlook_otf_'+timestamp+'_%s.png'%(pol.upper()))
+        fig.savefig(savepath+'qlook_obs_otf_'+timestamp+'_%s.png'%(pol.upper()))
         pylab.close(fig)
 
     plot(0, 'H')
