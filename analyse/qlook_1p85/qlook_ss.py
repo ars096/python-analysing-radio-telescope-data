@@ -6,7 +6,7 @@ Documents
 """
 
 
-def qlook_ss(dirpath, filesave=False):
+def qlook_ss(dirpath, filesave=False, savepath='./'):
     import os
     import pylab
     import analyse
@@ -50,8 +50,8 @@ def qlook_ss(dirpath, filesave=False):
         analyse.draw_ps_raw(raw, figure=fig, subplot=231+i, title='raw: '+isotope[i], show=False)
         analyse.draw_ss_spectrum(cube, flag, figure=fig, subplot=234+i, title='spectrum: '+isotope[i], show=False)
         continue
-    #fig.savefig(dirpath+name+'_H.png')
-    pylab.show()
+    fig.savefig(savepath+name+'_H.png')
+    #pylab.show()
 
     fig = pylab.figure(figsize=(20,12))
     fig.suptitle(name+'_V')
@@ -65,11 +65,11 @@ def qlook_ss(dirpath, filesave=False):
         analyse.draw_ps_raw(raw, figure=fig, subplot=231+i, title='raw: '+isotope[i], show=False)
         analyse.draw_ss_spectrum(cube, flag, figure=fig, subplot=234+i, title='spectrum: '+isotope[i], show=False)
         continue
-    #fig.savefig(dirpath+name+'_V.png')
-    pylab.show()
+    fig.savefig(savepath+name+'_V.png')
+    #pylab.show()
     return
 
-def easy_analyse(fitspath, save=False):
+def easy_analyse(fitspath, save=False, savepath='./'):
     import analyse
     print('make_cube: %s'%(fitspath.split('/')[-1]))
     raw_data = analyse.loadfits(fitspath)
@@ -78,7 +78,7 @@ def easy_analyse(fitspath, save=False):
     convolved_data = analyse.convolve(fitted_data, 2)
     fitted_data, flag = analyse.basefit(convolved_data, 'auto')
 
-    savepath = fitspath.split('.fits')[0]
+    savepath = savepath + fitspath.split('.fits')[0]
     if save:
         analyse.savefits(fitted_data, savepath+'.qlook.data.fits', clobber=True)
         analyse.savefits(flag, savepath+'.qlook.flag.fits', clobber=True)

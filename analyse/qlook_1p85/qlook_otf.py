@@ -6,7 +6,7 @@ Documents
 """
 
 
-def qlook_otf(dirpath, filesave=False, reduct=True):
+def qlook_otf(dirpath, filesave=False, reduct=True, savepath='./'):
     import os
     import time
     import pylab
@@ -76,6 +76,7 @@ def qlook_otf(dirpath, filesave=False, reduct=True):
         splt(sp13, subplot=333+3, title='13CO(2-1): spectrum')
         splt(sp18, subplot=333+6, title='C18O(2-1): spectrum')
         fig.savefig(dirpath+name+'_%s_test.png'%(pol), dpi=70)
+        fig.savefig(savepath+name+'_%s.png'%(pol), dpi=70)
         pylab.close(fig)
 
     plot(0, 'H')

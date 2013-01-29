@@ -4,7 +4,7 @@
 """
 Documents
 """
-def qlook_skydip(dirpath):
+def qlook_skydip(dirpath, savepath='./'):
     import os
     import pylab
     import analyse
@@ -66,8 +66,8 @@ def qlook_skydip(dirpath):
     ax1.set_title('IFpower (blue:Hpol red:Vpol)')
     ax1.grid()
     
-    pylab.savefig('qlook_skydip_' + name + '.png')
+    pylab.savefig(savepath+'qlook_skydip_' + name + '.png')
     pylab.close(ax.figure)
-    pylab.show()
+    #pylab.show()
     return
 

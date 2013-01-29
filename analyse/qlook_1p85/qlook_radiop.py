@@ -6,7 +6,7 @@ Documents
 """
 
 
-def qlook_radiop(dirpath):
+def qlook_radiop(dirpath, savepath='./'):
     import numpy
     import os
     import pylab
@@ -61,7 +61,7 @@ def qlook_radiop(dirpath):
     ax3.legend()
     ax4.legend()
     fig.text(0.5,0.975, target + ' cross scan results ' + name, horizontalalignment='center',verticalalignment='top')
-    pylab.savefig('qlook_radiop_' + name + '.png')
+    pylab.savefig(savepath+'qlook_radiop_' + name + '.png')
     #pylab.savefig('qlook_radiop' + name + '.pdf')
     pylab.close(fig)
     return
